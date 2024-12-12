@@ -2307,5 +2307,5 @@
   "youth",
   "zebra",
   "zesty",
-  "zonal",
+  "zonal"
 ]
