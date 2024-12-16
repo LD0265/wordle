@@ -21,24 +21,43 @@ impl Wordle {
             );
         }
 
-        // Read the word list as one string
-        let word_list_as_string = fs::read_to_string(file_path).expect("Failed to read file");
+        let file_result = fs::read_to_string("word-list.txt");
+        let mut file_content = String::new();
 
-        // Because its a json array we can do this
-        let word_list: Vec<String> =
-            serde_json::from_str(&word_list_as_string).expect("Failed to parse JSON");
+        // Split the content into lines and collect them into a Vec<String>
+        
+        match file_result {
+            Ok(res) => {
+                file_content = res
+            }
+            
+            Err(_) => println!("Could not read word-list.txt")
+        }
+        
+        let word_list: Vec<String> = file_content
+            .lines()
+            .map(|line| line.trim().to_string()) // Trim whitespace and convert to String
+            .collect();
 
         Self {
             word: "debug".to_string(), // just incase
             last_guessed_word: "".to_string(),
             guessed_words: vec![],
             word_list,
-            round_number: 0,
+            round_number: 0
         }
     }
 
     pub fn has_won(&self) -> bool {
         self.word == self.last_guessed_word
+    }
+    
+    pub fn has_lost(&self) -> bool {
+        self.round_number == 6
+    }
+    
+    pub fn get_word(&self) -> String {
+        self.word.clone()
     }
 
     pub fn make_guess(&mut self, guess: &String) -> bool {
@@ -71,10 +90,17 @@ impl Wordle {
         }
     }
 
-    pub fn generate_word(&mut self) -> String {
+    pub fn generate_word(&mut self) {
         let mut rng = rand::rng();
         let rand_idx = rng.random_range(0..self.word_list.len());
-        self.word_list[rand_idx].to_string()
+        
+        self.word = self.word_list[rand_idx].to_string()
+    }
+    
+    pub fn reset_game(&mut self) {
+        self.guessed_words.clear();
+        self.last_guessed_word = "".to_string();
+        self.round_number = 0;
     }
 
     // tbh ion rlly understand this
@@ -82,15 +108,12 @@ impl Wordle {
         let mut result: Vec<String> = vec![];
         let mut word_chars: Vec<char> = self.word.chars().collect();
         let guess_chars: Vec<char> = guess.chars().collect();
-
-        let mut correct_chars = 0;
-
+        
         for (i, &g_char) in guess_chars.iter().enumerate() {
             if i < word_chars.len() && g_char == word_chars[i] {
                 // Correct position so we highlight green
                 result.push((&g_char.to_ascii_uppercase().to_string().green()).to_string()); // Only call to_string() once
                 word_chars[i] = ' '; // Mark as used
-                correct_chars += 1;
             } else if word_chars.contains(&g_char) {
                 // Incorrect position so highlight yellow
                 result.push((&g_char.to_ascii_uppercase().to_string().yellow()).to_string()); // Only call to_string() once

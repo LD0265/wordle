@@ -34,13 +34,25 @@ fn main() {
         // it doesnt break
         input.clear();
         wordle.generate_word();
+        clear_console();
         
         loop {
-            // clear_console();
             wordle.print_game();
 
             if wordle.has_won() {
+                clear_console();
+                wordle.print_game();
                 println!("\nYou win!\n");
+                wordle.reset_game();
+                break;
+            }
+            
+            if wordle.has_lost() {
+                clear_console();
+                wordle.print_game();
+                println!("\nYou lose!\n");
+                println!("Word was: {}", wordle.get_word().to_ascii_uppercase());
+                wordle.reset_game();
                 break;
             }
             
@@ -56,7 +68,7 @@ fn main() {
             guess_input = guess_input.trim().to_ascii_lowercase();
             
             if guess_input.len() != 5 {
-                // clear_console();
+                clear_console();
                 println!("Word must be 5 letters long");
                 println!();
                 guess_input.clear();
@@ -64,13 +76,14 @@ fn main() {
             }
 
             if !wordle.make_guess(&guess_input) {
-                // clear_console();
-                
+                clear_console();
                 println!("Word not in list");
                 println!();
                 guess_input.clear();
                 continue;
             }
+            
+            clear_console();
         }
     }
 
