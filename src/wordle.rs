@@ -5,10 +5,10 @@ use std::path::Path;
 
 pub struct Wordle {
     word: String,
+    last_guessed_word: String,
     guessed_words: Vec<String>,
     word_list: Vec<String>,
-    round_number: u8,
-    has_won: bool,
+    round_number: u8
 }
 
 impl Wordle {
@@ -30,15 +30,15 @@ impl Wordle {
 
         Self {
             word: "debug".to_string(), // just incase
+            last_guessed_word: "".to_string(),
             guessed_words: vec![],
             word_list,
             round_number: 0,
-            has_won: false,
         }
     }
 
     pub fn has_won(&self) -> bool {
-        self.has_won
+        self.word == self.last_guessed_word
     }
 
     pub fn make_guess(&mut self, guess: &String) -> bool {
@@ -48,6 +48,7 @@ impl Wordle {
         }
 
         self.guessed_words.push(guess.clone());
+        self.last_guessed_word = guess.clone();
         self.round_number += 1;
 
         // true means it worked
@@ -100,10 +101,6 @@ impl Wordle {
                 result.push((&g_char.to_ascii_uppercase().to_string().bright_black()).to_string());
                 // Only call to_string() once
             }
-        }
-
-        if correct_chars == 5 {
-            self.has_won = true;
         }
 
         result

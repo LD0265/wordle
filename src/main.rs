@@ -3,6 +3,7 @@ mod wordle;
 use std::io;
 use std::io::Write;
 use wordle::Wordle;
+use std::process::Command;
 
 fn main() {
     let mut wordle = Wordle::new();
@@ -29,29 +30,33 @@ fn main() {
             break;
         }
         
-        // a little birdy told me this clears the console
-        print!("\x1B[2J\x1B[1;1H");
-
+        // clear here so that if they start a new game
+        // it doesnt break
+        input.clear();
+        wordle.generate_word();
+        
         loop {
+            // clear_console();
+            wordle.print_game();
+
             if wordle.has_won() {
-                println!("You win!");
+                println!("\nYou win!\n");
                 break;
             }
-
-            wordle.generate_word();
+            
             let mut guess_input = String::new();
-
-            wordle.print_game();
+            
             println!();
             print!("Guess a word: ");
             io::stdout().flush().unwrap();
             io::stdin()
                 .read_line(&mut guess_input)
                 .expect("Failed to read line");
+            
             guess_input = guess_input.trim().to_ascii_lowercase();
             
             if guess_input.len() != 5 {
-                print!("\x1B[2J\x1B[1;1H");
+                // clear_console();
                 println!("Word must be 5 letters long");
                 println!();
                 guess_input.clear();
@@ -59,18 +64,31 @@ fn main() {
             }
 
             if !wordle.make_guess(&guess_input) {
-                print!("\x1B[2J\x1B[1;1H");
+                // clear_console();
+                
                 println!("Word not in list");
                 println!();
                 guess_input.clear();
                 continue;
             }
-            
-            print!("\x1B[2J\x1B[1;1H");
         }
     }
 
     // Wait for user input before closing
     println!("Press Enter to exit...");
     io::stdin().read_line(&mut input).unwrap();
+}
+
+// a little robot birdy told me this works better
+fn clear_console() {
+    if cfg!(target_os = "windows") {
+        Command::new("cmd")
+            .args(&["/C", "cls"])
+            .status()
+            .expect("Failed to clear console on Windows");
+    } else {
+        Command::new("clear")
+            .status()
+            .expect("Failed to clear console on Unix-based systems");
+    }
 }
