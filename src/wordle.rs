@@ -13,15 +13,15 @@ pub struct Wordle {
 
 impl Wordle {
     pub fn new() -> Wordle {
-        let file_path = Path::new("word-list.txt");
+        let file_path = Path::new("../guessable-words.txt");
         if !file_path.exists() {
             panic!(
-                "File not found at {:?}. Ensure word-list.txt is in same dir as exe.",
+                "File not found at {:?}. Ensure guessable-words.txt is in same dir as exe.",
                 file_path
             );
         }
 
-        let file_result = fs::read_to_string("word-list.txt");
+        let file_result = fs::read_to_string("../guessable-words.txt");
         let mut file_content = String::new();
 
         // Split the content into lines and collect them into a Vec<String>
@@ -31,7 +31,7 @@ impl Wordle {
                 file_content = res
             }
             
-            Err(_) => println!("Could not read word-list.txt")
+            Err(_) => println!("Could not read guessable-words.txt")
         }
         
         let word_list: Vec<String> = file_content
