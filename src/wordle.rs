@@ -7,43 +7,41 @@ pub struct Wordle {
     word: String,
     last_guessed_word: String,
     guessed_words: Vec<String>,
-    word_list: Vec<String>,
+    guessable_word_list: Vec<String>,
+    chooseable_word_list: Vec<String>,
     round_number: u8
 }
 
 impl Wordle {
     pub fn new() -> Wordle {
-        let file_path = Path::new("../guessable-words.txt");
-        if !file_path.exists() {
-            panic!(
-                "File not found at {:?}. Ensure guessable-words.txt is in same dir as exe.",
-                file_path
-            );
+        let guessable_file_path = Path::new("guessable-words.txt");
+        let chooseable_file_path = Path::new("chooseable-words.txt");
+
+        if !guessable_file_path.exists() || !chooseable_file_path.exists() {
+            panic!("Required files not found. Ensure 'guessable-words.txt' and 'chooseable-words.txt' are in the same directory as the executable.");
         }
 
-        let file_result = fs::read_to_string("../guessable-words.txt");
-        let mut file_content = String::new();
+        let guessable_file_content =
+            fs::read_to_string(guessable_file_path).expect("Failed to read 'guessable-words.txt'");
+        let chooseable_file_content =
+            fs::read_to_string(chooseable_file_path).expect("Failed to read 'chooseable-words.txt'");
 
-        // Split the content into lines and collect them into a Vec<String>
-        
-        match file_result {
-            Ok(res) => {
-                file_content = res
-            }
-            
-            Err(_) => println!("Could not read guessable-words.txt")
-        }
-        
-        let word_list: Vec<String> = file_content
+        let guessable_word_list: Vec<String> = guessable_file_content
             .lines()
-            .map(|line| line.trim().to_string()) // Trim whitespace and convert to String
+            .map(|line| line.trim().to_string())
+            .collect();
+
+        let chooseable_word_list: Vec<String> = chooseable_file_content
+            .lines()
+            .map(|line| line.trim().to_string())
             .collect();
 
         Self {
             word: "debug".to_string(), // just incase
             last_guessed_word: "".to_string(),
             guessed_words: vec![],
-            word_list,
+            guessable_word_list,
+            chooseable_word_list,
             round_number: 0
         }
     }
@@ -62,7 +60,7 @@ impl Wordle {
 
     pub fn make_guess(&mut self, guess: &String) -> bool {
         // We wanna return if it failed or not
-        if !self.word_list.contains(&guess) {
+        if !self.guessable_word_list.contains(&guess) {
             return false;
         }
 
@@ -92,9 +90,9 @@ impl Wordle {
 
     pub fn generate_word(&mut self) {
         let mut rng = rand::rng();
-        let rand_idx = rng.random_range(0..self.word_list.len());
+        let rand_idx = rng.random_range(0..self.chooseable_word_list.len());
         
-        self.word = self.word_list[rand_idx].to_string()
+        self.word = self.chooseable_word_list[rand_idx].to_string()
     }
     
     pub fn reset_game(&mut self) {
